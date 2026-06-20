@@ -26,6 +26,12 @@ class CrewMember(BaseModel):
 
     is_active: bool = Field(default=True)
 
+    def describe(self) -> str:
+        return (
+            f"- {self.name} ({self.rank.value}) "
+            f"- {self.specialization}\n"
+        )
+
 
 class SpaceMission(BaseModel):
     mission_id: str = Field(min_length=5, max_length=15)
@@ -62,9 +68,53 @@ class SpaceMission(BaseModel):
             raise ValueError("All crew members must be active")
         return self
 
+    def __str__(self) -> str:
+        crew_list = "".join(m.describe() for m in self.crew)
+        return (
+            f"Mission: {self.mission_name}\n"
+            f"ID: {self.mission_id}\n"
+            f"Destination: {self.destination}\n"
+            f"Duration: {self.duration_days} days\n"
+            f"Budget: ${self.budget_millions}M\n"
+            f"Crew size: {len(self.crew)}\n"
+            f"Crew members:\n"
+            f"{crew_list}"
+        )
+
+
+def get_crew() -> list[CrewMember]:
+    return [
+        CrewMember(member_id="1boba", name="Sarah Connor",
+                   rank=Rank.commander, age=34,
+                   specialization="Mission Command",
+                   years_experience=3),
+        CrewMember(member_id="2buba", name="John Smith",
+                   rank=Rank.lieutenant, age=43,
+                   specialization="Navigation",
+                   years_experience=7),
+        CrewMember(member_id="3biba", name="Alice Johnson",
+                   rank=Rank.officer, age=23,
+                   specialization="Engineering",
+                   years_experience=5)
+    ]
+
 
 def main() -> None:
-    pass
+    print("Space Mission Crew Validation")
+    print("=========================================")
+
+    crew = get_crew()
+    print("Valid mission created:")
+    sm = SpaceMission(
+        mission_id="M2024_MARS",
+        mission_name="Mars Colony Establishment",
+        destination="Mars",
+        launch_date=datetime(2024, 1, 15, 10, 0, 0),
+        duration_days=900,
+        crew=crew,
+        budget_millions=2500.0
+    )
+    print(sm)
 
 
 if __name__ == "__main__":
