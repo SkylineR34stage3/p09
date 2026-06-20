@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
+from pydantic import ValidationError
 from enum import Enum
 from datetime import datetime
 from typing import Optional
@@ -51,9 +52,51 @@ class AlienContact(BaseModel):
                              " requires a decodable content")
         return self
 
+    def __str__(self) -> str:
+        return (
+            f"ID: {self.contact_id}\n"
+            f"Type: {self.contact_type}\n"
+            f"Location: {self.location}\n"
+            f"Signal: {self.signal_strength}/10\n"
+            f"Duration: {self.duration_minutes} minutes\n"
+            f"Witnesses: {self.witness_count}\n"
+            f"Message: '{self.message_received}'"
+        )
+
 
 def main() -> None:
-    pass
+    print("Alien Contact Log Validation")
+    print("======================================")
+
+    print("Valid contact report:")
+    ac = AlienContact(
+        contact_id="AC_2024_001",
+        timestamp=datetime(2024, 1, 15, 10, 0, 0),
+        location="Area 51, Nevada",
+        contact_type=ContactType.radio,
+        signal_strength=8.5,
+        duration_minutes=45,
+        witness_count=5,
+        message_received='Greetings from Zeta Reticuli'
+    )
+    print(ac)
+
+    print("\n======================================")
+    print("Expected validation error:")
+    try:
+        AlienContact(
+            contact_id="AC_2024_001",
+            timestamp=datetime(2024, 1, 15, 10, 0, 0),
+            location="Area 51, Nevada",
+            contact_type=ContactType.telepathic,
+            signal_strength=8.5,
+            duration_minutes=45,
+            witness_count=2,
+            message_received='Greetings from Zeta Reticuli'
+        )
+    except ValidationError as e:
+        for error in e.errors():
+            print(error["msg"])
 
 
 if __name__ == "__main__":
