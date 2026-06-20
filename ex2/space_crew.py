@@ -27,7 +27,7 @@ class CrewMember(BaseModel):
 
     is_active: bool = Field(default=True)
 
-    def describe(self) -> str:
+    def __str__(self) -> str:
         return (
             f"- {self.name} ({self.rank.value}) "
             f"- {self.specialization}"
@@ -70,7 +70,7 @@ class SpaceMission(BaseModel):
         return self
 
     def __str__(self) -> str:
-        crew_list = "\n".join(m.describe() for m in self.crew)
+        crew_list = "\n".join(str(m) for m in self.crew)
         return (
             f"Mission: {self.mission_name}\n"
             f"ID: {self.mission_id}\n"
