@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
+from pydantic import ValidationError
 from enum import Enum
 from datetime import datetime
 
@@ -82,20 +83,23 @@ class SpaceMission(BaseModel):
         )
 
 
-def get_crew() -> list[CrewMember]:
+def get_crew(
+        exp: tuple[int, int, int],
+        rank: tuple[Rank, Rank, Rank]
+        ) -> list[CrewMember]:
     return [
         CrewMember(member_id="1boba", name="Sarah Connor",
-                   rank=Rank.commander, age=34,
+                   rank=rank[0], age=34,
                    specialization="Mission Command",
-                   years_experience=3),
+                   years_experience=exp[0]),
         CrewMember(member_id="2buba", name="John Smith",
-                   rank=Rank.lieutenant, age=43,
+                   rank=rank[1], age=43,
                    specialization="Navigation",
-                   years_experience=7),
+                   years_experience=exp[1]),
         CrewMember(member_id="3biba", name="Alice Johnson",
-                   rank=Rank.officer, age=23,
+                   rank=rank[2], age=23,
                    specialization="Engineering",
-                   years_experience=5)
+                   years_experience=exp[2])
     ]
 
 
@@ -103,7 +107,6 @@ def main() -> None:
     print("Space Mission Crew Validation")
     print("=========================================")
 
-    crew = get_crew()
     print("Valid mission created:")
     sm = SpaceMission(
         mission_id="M2024_MARS",
@@ -111,10 +114,32 @@ def main() -> None:
         destination="Mars",
         launch_date=datetime(2024, 1, 15, 10, 0, 0),
         duration_days=900,
-        crew=crew,
+        crew=get_crew(
+                (3, 5, 7),
+                (Rank.commander, Rank.lieutenant, Rank.officer)
+                ),
         budget_millions=2500.0
     )
     print(sm)
+
+    print("\n=========================================")
+    print("Expected validation error:")
+    try:
+        SpaceMission(
+            mission_id="M2024_MARS",
+            mission_name="Mars Colony Establishment",
+            destination="Mars",
+            launch_date=datetime(2024, 1, 15, 10, 0, 0),
+            duration_days=900,
+            crew=get_crew(
+                (3, 5, 7),
+                (Rank.cadet, Rank.lieutenant, Rank.officer)
+                ),
+            budget_millions=2500.0
+        )
+    except ValidationError as e:
+        for error in e.errors():
+            print(error["ctx"]["error"])
 
 
 if __name__ == "__main__":
