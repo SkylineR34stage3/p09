@@ -55,7 +55,7 @@ class AlienContact(BaseModel):
     def __str__(self) -> str:
         return (
             f"ID: {self.contact_id}\n"
-            f"Type: {self.contact_type}\n"
+            f"Type: {self.contact_type.value}\n"
             f"Location: {self.location}\n"
             f"Signal: {self.signal_strength}/10\n"
             f"Duration: {self.duration_minutes} minutes\n"
@@ -96,7 +96,7 @@ def main() -> None:
         )
     except ValidationError as e:
         for error in e.errors():
-            print(error["msg"])
+            print(error["ctx"]["error"])
 
 
 if __name__ == "__main__":
